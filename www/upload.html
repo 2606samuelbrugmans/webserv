@@ -1,0 +1,32 @@
+www/upload.html  page
+
+<p></p>
+
+<form action="./upload.html" method="post" enctype="multipart/form-data">
+    <p>/upload form </p>
+    <label>
+        Choose a file: <input type="file" name="upload_file" multiple>
+    </label>
+        Choose a check: <input type="checkbox" name="check" multiple>
+    <button type="submit">Upload</button>
+</form>
+
+<form action="./upload.html" method="post" enctype="multipart/form-data">
+    <p>/upload multidimentional form </p>
+    <label>
+        Choose files: <input type="file" name="upload_file1" multiple>
+    </label>
+    <label>
+        Choose files2: <input type="file" name="upload_file2" multiple>
+    </label>
+        Choose a check: <input type="checkbox" name="check" multiple>
+    <button type="submit">Upload</button>
+</form>
+
+<form action="/sub" method="post" enctype="multipart/form-data">
+    <p>/sub form </p>
+    <label>
+        Choose a file: <input type="file" name="upload_file3" multiple>
+    </label>
+    <button type="submit">Upload</button>
+</form>

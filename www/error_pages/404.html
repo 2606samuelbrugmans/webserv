@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Not Found</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .rainbow-text {
+            font-size: 4rem;
+            font-weight: bold;
+            background: #CF0000;
+            background: linear-gradient(to right, #CF0000 0%, #FF7F00 14%, #FFFF00 32%, #00FF00 50%, #0000FF 67%, #4B0082 84%, #9400D3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #333;
+                color: #eee;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="rainbow-text">
+        404 Not Found
+    </div>
+</body>
+</html>
