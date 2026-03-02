@@ -19,6 +19,7 @@ SRCS				= main.cpp \
 					  CgiRunner.cpp \
 					  client_cgi.cpp \
 					  ConfigParser.cpp \
+					  print_config.cpp \
 					  DirectoryListing.cpp \
 					  HttpPacket.cpp \
 					  HttpRequest.cpp \

@@ -187,7 +187,9 @@ int main(int argc, char* argv[]) {
     } catch (const std::exception& e) {
         std::cerr << "Error parsing config file: " << e.what() << '\n';
     }
+
     server.servers = configs;
+    printAllConfigs(server.servers); // print all configs for debugging
     try {
         for (size_t i = 0; i < server.servers.size(); i++) {
             ServerConfig& server_config = server.servers[i];
@@ -204,14 +206,13 @@ int main(int argc, char* argv[]) {
 		std::cerr << "Error: " << e.what() << std::endl;
 		return 1;
 	}
-
     while (true)
     {
         poll(&server.fds[0], server.fds.size(), -1);
         for (size_t i = 0; i < server.fds.size(); i++)
         {
             pollfd p = server.fds[i]; // for clarity
-            fd_context current_ctx = server.fd_contexts[p.fd]; // also for clarity
+            fd_context& current_ctx = server.fd_contexts[p.fd];// also for clarity
             if ( p.revents & (POLLERR | POLLHUP | POLLNVAL) )
             {
                 std::cout << "POLLERR | POLLHUP | POLLNVAL event on fd: " << p.fd << std::endl;
@@ -224,13 +225,17 @@ int main(int argc, char* argv[]) {
                 if (current_ctx.type == fd_context::CGI_INPUT && current_ctx.client->get_client_state() == PREPARING_CGI) // CGI input ready to write
                 {
                     cgi_handles cgi = current_ctx.client->get_cgi_handles();
-
-                    WriteToCgiInput(cgi.input_data, cgi.input_fds[1]);
-                    close(cgi.input_fds[1]); // close the write end of the input pipe
-                    runCgiScript(/*location,*/ server.servers[current_ctx.server_index],
+                    
+                    int write_result = WriteToCgiInput(cgi);
+                    if (write_result < 0) {
+                        std::cerr << "Error writing to CGI input" << std::endl;
+                    }
+                    else if (write_result == 1) {
+                        runCgiScript(/*location,*/ server.servers[current_ctx.server_index],
                          "", cgi.env, *current_ctx.client, server); // we will set the actual script path and env later in runCgiScript when we fork, for now we just want to set the client state to waiting for cgi output after writing the input
                     // we can write the request body to the CGI input fd here, but for now we will just set the client state to READING_CGI and then we will write the request body to the CGI input fd in the runCgiScript function before we fork, so that we can avoid blocking in case of large request body
-                    current_ctx.client->set_client_state(READING_CGI);
+                        current_ctx.client->set_client_state(READING_CGI);
+                    }
                 }
                 else if (current_ctx.type == fd_context::SERVER)      // new client ?
                     acceptNewClient(server, p.fd);
@@ -250,8 +255,8 @@ int main(int argc, char* argv[]) {
                 }
             }
             else if (p.revents & POLLOUT)
-                if (server.fd_contexts[p.fd].type == fd_context::CLIENT && server.fd_contexts[p.fd].client->get_client_state() == READY_TO_PROCESS)
-                    server.fd_contexts[p.fd].client->sendData(server, p.fd);
+                if (current_ctx.type == fd_context::CLIENT && current_ctx.client->get_client_state() == READY_TO_PROCESS)
+                    current_ctx.client->sendData(server, p.fd);
         }
     }
     /*

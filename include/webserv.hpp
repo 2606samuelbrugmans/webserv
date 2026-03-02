@@ -34,6 +34,7 @@
 #include "HttpRequest.hpp"
 #include "HttpRequestParser.hpp"
 #include "HttpResponse.hpp"
+#include "debug.hpp"
 #include "colors.hpp"
 #include "Client.hpp"
 #include "Connection.hpp"

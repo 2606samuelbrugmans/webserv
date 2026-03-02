@@ -71,7 +71,7 @@ void acceptNewClient(webserv &connection, int fd)
             // can't use C++11 initializer list under -std=c++98, build a struct
             fd_context ctx;
             ctx.type = fd_context::CLIENT;
-            ctx.server_index = -1;
+            ctx.server_index = connection.fd_contexts[fd].server_index; // inherit server index from listening socket
             ctx.client = new_client;
             ctx.cgi_pid = 0;
             connection.fd_contexts[client_fd] = ctx; // add client fd to fd contexts

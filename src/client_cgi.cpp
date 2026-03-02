@@ -1,22 +1,27 @@
 #include "webserv.hpp"
-
-void WriteToCgiInput(const std::string& input, int input_fd) {
+// this could be blocking if not writen in one go we have to move input to a struct and truncat after writing
+int WriteToCgiInput(cgi_handles &cgi) {
 	ssize_t nw;
-	if (!input.empty()) {
-		while ((nw = write(input_fd, input.c_str(), input.size())) < 0) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				// If the pipe is full, we can wait for it to be writable again
-				fd_set write_fds;
-				FD_ZERO(&write_fds);
-				FD_SET(input_fd, &write_fds);
-				select(input_fd + 1, NULL, &write_fds, NULL, NULL);
-			} else {
-				perror("write");
-				return; // Handle error appropriately
+	if (!cgi.input_data.empty()) {
+		while ((nw = write(cgi.input_fds[1], cgi.input_data.c_str(), cgi.input_data.size())) < 0) {
+			if (nw < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+				// If the write would block, we can wait for the next POLLOUT event to write more data
+				continue;
+			} else if (nw < 0) {
+				std::cerr << "Error writing to CGI input: " << strerror(errno) << std::endl;
+				break; // break on error other than EAGAIN
+			}
+			else {
+				cgi.input_data.erase(0, nw); // remove the part that was successfully written
 			}
 		}
-		(void)nw; // silence unused-result warning
 	}
+	if (cgi.input_data.empty()) {
+		close(cgi.input_fds[1]); // close the write end of the input pipe after writing all data
+		
+		return 1; // return success code if all data was written
+	}
+	return 0;
 }
 // we could use throw instead of error codes whichever you prefer i have no qualms about either
 int	Client::read_response_from_cgi(webserv &connection, int fd) {

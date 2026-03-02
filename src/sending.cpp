@@ -21,7 +21,9 @@ void Client::sendData(webserv &connection, int fd)
     // Finished sending entire HTTP message
     if (bytes_sent == packet.size())
     {
-        reset();                 // clear parsing state you don't want to clear the buffer
+        std::cout << "Finished sending response to client fd " << fd << std::endl;
+        reset();      
+                   // clear parsing state you don't want to clear the buffer
         // actually cause it can have the next request, but you want to clear the headers and body and stuff
         bytes_sent = 0;
 

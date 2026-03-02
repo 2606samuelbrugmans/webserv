@@ -38,7 +38,7 @@ bool isListeningSocket(const webserv& connection, int fd);
 void socketing(ServerConfig &config, webserv &server);
 void polling(int fd, std::vector<pollfd>& connection);
 void acceptNewClient(webserv &connection, int fd);
-void WriteToCgiInput(const std::string& input, int input_fd);
+int WriteToCgiInput(cgi_handles &cgi);
 struct fileconfig {};
 
 class Client {
